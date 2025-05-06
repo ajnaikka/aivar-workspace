@@ -1,0 +1,3 @@
+terraform state rm module.bedrock.aws_opensearchserverless_collection.schema_kb
+terraform state rm module.bedrock.opensearch_index.schema_kb
+terraform state rm module.bedrock.opensearch_index.query_history_kb
