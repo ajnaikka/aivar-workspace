@@ -1,0 +1,36 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "DenyDeletionOfCloudTrail",
+        "Effect": "Deny",
+        "Action": [
+          "cloudtrail:DeleteTrail",
+          "cloudtrail:StopLogging"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Sid": "DenyDeletionOfGuardDuty",
+        "Effect": "Deny",
+        "Action": [
+          "guardduty:DeleteDetector",
+          "guardduty:StopMonitoringMembers",
+          "guardduty:DisassociateFromMasterAccount"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Sid": "DenyDeletionOfConfig",
+        "Effect": "Deny",
+        "Action": [
+          "config:DeleteConfigurationRecorder",
+          "config:DeleteDeliveryChannel",
+          "config:StopConfigurationRecorder"
+        ],
+        "Resource": "*"
+      }
+    ]
+  }
+  
+ 

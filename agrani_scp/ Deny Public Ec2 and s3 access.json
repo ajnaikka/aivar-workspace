@@ -1,0 +1,72 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "DenyPublicIPAtLaunch",
+        "Effect": "Deny",
+        "Action": "ec2:RunInstances",
+        "Resource": "*",
+        "Condition": {
+          "Bool": {
+            "ec2:AssociatePublicIpAddress": "true"
+          }
+        }
+      },
+      {
+        "Sid": "DenyElasticIPAssociation",
+        "Effect": "Deny",
+        "Action": "ec2:AssociateAddress",
+        "Resource": "*"
+      },
+      {
+        "Sid": "DenyS3PublicACLsAndPolicies",
+        "Effect": "Deny",
+        "Action": [
+          "s3:PutBucketAcl",
+          "s3:PutObjectAcl",
+          "s3:PutBucketPolicy"
+        ],
+        "Resource": "*",
+        "Condition": {
+          "ForAnyValue:StringLikeIfExists": {
+            "s3:x-amz-acl": [
+              "public-read",
+              "public-read-write"
+            ]
+          }
+        }
+      },
+      {
+        "Sid": "DenyS3PublicGrant",
+        "Effect": "Deny",
+        "Action": [
+          "s3:PutBucketAcl",
+          "s3:PutObjectAcl",
+          "s3:PutBucketPolicy"
+        ],
+        "Resource": "*",
+        "Condition": {
+          "ForAnyValue:StringLikeIfExists": {
+            "s3:x-amz-grant-read": [
+              "http://acs.amazonaws.com/groups/global/AllUsers",
+              "http://acs.amazonaws.com/groups/global/AuthenticatedUsers"
+            ],
+            "s3:x-amz-grant-write": [
+              "http://acs.amazonaws.com/groups/global/AllUsers",
+              "http://acs.amazonaws.com/groups/global/AuthenticatedUsers"
+            ]
+          }
+        }
+      },
+      {
+        "Sid": "DenyS3BlockPublicAccessChange",
+        "Effect": "Deny",
+        "Action": [
+          "s3:PutBucketPublicAccessBlock",
+          "s3:PutAccountPublicAccessBlock"
+        ],
+        "Resource": "*"
+      }
+    ]
+  }
+  
