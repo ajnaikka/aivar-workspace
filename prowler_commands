@@ -1,0 +1,51 @@
+# prowler
+
+brew install prowler
+
+prowler -v
+
+prowler -h
+
+prowler aws -h
+
+prowler aws --region us-east-1 ap-south-1
+
+prowler aws --list-checks
+
+prowler aws --list-categories
+
+# Execute Certain Checks
+
+# To execute certain checks:
+  prowler aws --checks CHECK1 CHECK2
+
+# To execute checks under certain categories:
+  prowler aws --category CATEGORY1 CATEGORY2
+
+# To execute checks for a particular service:
+  prowler aws --services SERVICE1 SERVICE2
+
+# Also check out --excluded-check and --excluded-service options
+
+# List compliance framework:
+
+prowler aws --list-compliance
+
+prowler aws --compliance FRAMEWORKsave output directly to s3 buckets 
+
+--output-bucket
+
+# Others 
+
+--output-filename
+--output-directory
+
+prowler aws --config-file  config.yamlprowler aws --checks-file checksfile.json     # write what are the checks that need to be executed in that json file 
+
+aws --list-fixer
+prowler aws --checks ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_22 --region us-east-1 
+
+prowler aws --checks ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_22 --region us-east-1 --fixer
+
+prowler aws --compliance nist_800_53_revision_5_aws
+
