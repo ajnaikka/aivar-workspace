@@ -1,0 +1,70 @@
+<powershell>
+# Enable TLS 1.2
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+# Define installer URL
+$installerUrl = "https://amazoncloudwatch-agent.s3.amazonaws.com/windows/amd64/latest/amazon-cloudwatch-agent.msi"
+$msiPath = "$env:TEMP\\amazon-cloudwatch-agent.msi"
+Write-Host "Downloading Amazon CloudWatch Agent..."
+Invoke-WebRequest -Uri $installerUrl -OutFile $msiPath
+Write-Host "Installing Amazon CloudWatch Agent..."
+Start-Process msiexec.exe -ArgumentList "/i `"$msiPath`" /qn" -Wait
+# Create CloudWatch Agent config
+$configPath = "C:\\ProgramData\\Amazon\\AmazonCloudWatchAgent\\config.json"
+$config = @'
+{
+    "agent": {
+        "metrics_collection_interval": 60
+    },
+    "metrics": {
+        "namespace": "CWAgent",
+        "append_dimensions": {
+            "InstanceId": "${aws:InstanceId}"
+        },
+        "metrics_collected": {
+            "Memory": {
+                "measurement": [
+                    "% Committed Bytes In Use",
+                    "Committed Bytes"
+                ],
+                "metrics_collection_interval": 60
+            },
+            "LogicalDisk": {
+                "measurement": [
+                    "% Free Space",
+                    "Free Megabytes"
+                ],
+                "resources": [
+                    "*"
+                ],
+                "metrics_collection_interval": 60
+            },
+            "PhysicalDisk": {
+                "measurement": [
+                    "Disk Read Bytes/sec",
+                    "Disk Write Bytes/sec",
+                    "Current Disk Queue Length",
+                    "% Idle Time",
+                    "Disk Reads/sec",
+                    "% Disk Read Time",
+                    "Disk Writes/sec",
+                    "% Disk Write Time"
+                ],
+                "resources": [
+                    "*"
+                ],
+                "metrics_collection_interval": 60
+            }
+        }
+    }
+}
+'@
+$config | Set-Content -Path $configPath -Force
+# Apply configuration and start service
+& "C:\\Program Files\\Amazon\\AmazonCloudWatchAgent\\amazon-cloudwatch-agent-ctl.ps1" `
+  -a fetch-config `
+  -m ec2 `
+  -s `
+  -c "file:$configPath"
+# Set service to auto-start
+Set-Service -Name AmazonCloudWatchAgent -StartupType Automatic
+</powershell>
