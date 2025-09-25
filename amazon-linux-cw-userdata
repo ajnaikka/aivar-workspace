@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Update system
+yum update -y
+
+# Install basic tools
+yum install -y htop vim wget curl
+
+# Install Amazon CloudWatch Agent
+yum install -y amazon-cloudwatch-agent
+
+# Create the CloudWatch Agent configuration for memory metrics
+# This block is now corrected with standard spaces for JSON validity
+cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<EOF
+{
+    "agent": {
+        "metrics_collection_interval": 60
+    },
+    "metrics": {
+        "namespace": "CWAgent",
+        "append_dimensions": {
+            "InstanceId": "\$${aws:InstanceId}"
+        },
+        "metrics_collected": {
+            "mem": {
+                "measurement": [
+                    "used_percent",
+                    "used"
+                ]
+            },
+            "disk": {
+                "measurement": [
+                    "used_percent",
+                    "free",
+                    "inodes_free",
+                    "inodes_total",
+                    "inodes_used",
+                    "total",
+                    "used"
+                ],
+                "resources": [
+                    "*"
+                ]
+            },
+            "diskio": {
+                "measurement": [
+                    "read_bytes",
+                    "write_bytes",
+                    "iops_in_progress",
+                    "io_time",
+                    "reads",
+                    "read_time",
+                    "writes",
+                    "write_time"
+                ],
+                "resources": [
+                    "*"
+                ]
+            }
+        }
+    }
+}
+EOF
+
+# Start and enable the CloudWatch Agent service for persistence on reboots
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+    -a fetch-config \
+    -m ec2 \
+    -s \
+    -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+
+systemctl enable amazon-cloudwatch-agent
+systemctl restart amazon-cloudwatch-agent
+
+# Log the completion
+echo "CloudWatch Agent setup completed at $(date)" >> /var/log/cloudwatch-setup.log
